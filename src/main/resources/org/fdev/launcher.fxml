@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+
+
+<?import javafx.scene.control.Label?>
+<VBox alignment="CENTER" fx:controller="org.fdev.controller.Launcher" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <ProgressIndicator fx:id="progressIndicator" prefHeight="175.0" prefWidth="198.0" progress="0.0"/>
+      <Label  fx:id="loadingText"  />
+   </children>
+</VBox>
