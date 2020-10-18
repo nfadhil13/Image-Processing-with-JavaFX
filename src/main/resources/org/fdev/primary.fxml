@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.fdev.controller.PrimaryController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.fdev.controller.PrimaryController">
    <children>
       <MenuBar>
         <menus>
@@ -17,6 +16,8 @@
           </Menu>
         </menus>
       </MenuBar>
+       <ProgressIndicator fx:id="progressIndicator" prefHeight="36.0" prefWidth="170.0" progress="0.0" />
       <ImageView fx:id="imagePreview" fitHeight="314.0" fitWidth="600.0" pickOnBounds="true" preserveRatio="true" />
+      <Button fx:id="testButton" mnemonicParsing="false" text="Button" />
    </children>
 </VBox>

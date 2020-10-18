@@ -1,25 +1,31 @@
 package org.fdev.controller;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
+import org.fdev.App;
+import org.fdev.business_layer.FilterInteractors;
+import org.fdev.utiil.FilterCallback;
+import org.fdev.utiil.ImageFilterResponse;
 
-public class PrimaryController implements Initializable {
+public class PrimaryController implements Initializable, FilterCallback {
 
     public Menu menuFile;
     public ImageView imagePreview;
+    public Button testButton;
+    public FilterInteractors filterInteractors;
+
+
+    private String currentFile = "";
 
 
     @Override
@@ -29,6 +35,18 @@ public class PrimaryController implements Initializable {
 
     private void initUI() {
         initMenu();
+        initListener();
+        initObserver();
+    }
+
+    private void initObserver() {
+        filterInteractors = new FilterInteractors(this);
+    }
+
+    private void initListener() {
+        testButton.setOnAction(e -> {
+            filterInteractors.filterImage(currentFile, FilterInteractors.MEDIAN_BLUR);
+        });
     }
 
     private void initMenu() {
@@ -36,7 +54,6 @@ public class PrimaryController implements Initializable {
 
         menuItemAddFile.setOnAction(e -> {
             openFileExplorer();
-            testOpenCV();
         });
         menuFile.getItems().add(menuItemAddFile);
 
@@ -45,11 +62,12 @@ public class PrimaryController implements Initializable {
     private void openFileExplorer() {
         FileChooser fc = new FileChooser();
         fc.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("jpg" , "*.jpg")
+                new FileChooser.ExtensionFilter("png", "*.png")
         );
         try {
             File file = fc.showOpenDialog(null);
-            if(file != null){
+            if (file != null) {
+                currentFile = file.getAbsolutePath();
                 Image image = new Image(file.toURI().toString());
                 imagePreview.setImage(image);
             }
@@ -58,8 +76,21 @@ public class PrimaryController implements Initializable {
         }
     }
 
-    private void testOpenCV(){
-        Mat mat = Mat.eye(3, 3, CvType.CV_8UC1);
-        System.out.println("mat = " + mat.dump());
+    @Override
+    public void imageFilterStateChange(ImageFilterResponse response) {
+        switch (response.getStatus()) {
+            case SUCCESS:
+                App.println("success");
+                if(response.getData() instanceof ByteArrayInputStream){
+                    imagePreview.setImage(new Image((ByteArrayInputStream)response.getData()));
+                }
+                break;
+            case ERROR:
+                App.println(response.getMessage());
+                break;
+            case LOADING:
+                App.println("Loading");
+                break;
+        }
     }
 }

@@ -37,7 +37,7 @@ public class App extends Application {
         return fxmlLoader.load();
     }
 
-    private static void println(String test) {
+    public static void println(String test) {
         System.out.println(test);
     }
 
