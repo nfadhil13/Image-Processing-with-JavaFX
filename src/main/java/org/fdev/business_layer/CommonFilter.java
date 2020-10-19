@@ -15,8 +15,8 @@ import static org.opencv.core.CvType.CV_8U;
 
 public class CommonFilter implements BaseFilter {
 
-    private static final String SUCCESS_FILTER = "BlurFilter Success";
-    private static final String FAIL_FILTER = "BlurFilter Fail";
+    private static final String SUCCESS_FILTER = "Common Filter Success";
+    private static final String FAIL_FILTER = "Common Filter Fail";
     private static final String FILEPATH_EMPTY = "Filepath should not empty";
 
 
@@ -39,6 +39,11 @@ public class CommonFilter implements BaseFilter {
             String errorMessage = exception.getMessage();
             return ImageFilterResponse.error(FAIL_FILTER + "\n cause : \n\n" +  errorMessage);
         }
+    }
+
+    @Override
+    public String filterName() {
+        return "Common Filter";
     }
 
 }

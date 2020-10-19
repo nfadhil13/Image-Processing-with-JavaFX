@@ -1,8 +1,14 @@
 package org.fdev.business_layer;
 
+import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.concurrent.Task;
-import org.fdev.utiil.FilterCallback;
+import org.fdev.App;
 import org.fdev.utiil.ImageFilterResponse;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class FilterInteractors {
 
@@ -13,7 +19,6 @@ public class FilterInteractors {
     public static final int MEDIAN_BLUR = 5;
 
 
-    private FilterCallback filterCallback;
     private Task<ImageFilterResponse> task;
     private BilateralFilter BilateralFilter = new BilateralFilter();
     private CommonFilter commonFilter = new CommonFilter();
@@ -21,47 +26,49 @@ public class FilterInteractors {
     private GaussianBlurFilter gaussianBlurFilter = new GaussianBlurFilter();
     private MedianBlur medianBlur = new MedianBlur();
 
-    public FilterInteractors(FilterCallback filterCallback) {
-        this.filterCallback = filterCallback;
+
+    private SimpleStringProperty filterName;
+    private SimpleObjectProperty<ImageFilterResponse> imageResponse = new SimpleObjectProperty<>();
+
+
+    private String currentFile = "";
+    private BaseFilter currentFilter;
+
+    public FilterInteractors() {
         initDummyTask();
+        currentFilter = commonFilter;
+        filterName = new SimpleStringProperty(currentFilter.filterName());
     }
 
 
-    public void filterImage(String filtepath, int mode) {
-        if(!isTaskActive()){
-            switch (mode) {
-                case BILATERAL_BLUR_FILTER:
-                    doFilter(BilateralFilter, filtepath);
-                    break;
-                case GAUSSIAN_BLUR_FILTER:
-                    doFilter(gaussianBlurFilter , filtepath);
-                    break;
-                case COMMON_FILTER:
-                    doFilter(commonFilter, filtepath);
-                case BLUR_FILTER :
-                    doFilter(blurFilter , filtepath);
-                case MEDIAN_BLUR :
-                    doFilter(medianBlur , filtepath);
+    public void filterImage() {
+        if (!currentFile.equals("")) {
+            if (!isTaskActive()) {
+                doFilter(getCurrentFilter());
+            } else {
+                imageResponse.set(ImageFilterResponse.error("Your filtering still running"));
             }
-        }else{
-            filterCallback.imageFilterStateChange(ImageFilterResponse.error("Your filtering still running"));
+        } else {
+            imageResponse.set(ImageFilterResponse.error("To filter you need to input image"));
         }
-
     }
 
-    private void doFilter(BaseFilter baseFilter , String filepath){
+    private void doFilter(BaseFilter baseFilter) {
         task = new Task<>() {
             @Override
             protected ImageFilterResponse call() throws Exception {
-                filterCallback.imageFilterStateChange(ImageFilterResponse.loading());
-                Thread.sleep(3000);
-                return baseFilter.filter(filepath);
+                return baseFilter.filter(getCurrentFile());
             }
         };
         task.setOnSucceeded(e -> {
-            filterCallback.imageFilterStateChange(task.getValue());
+            imageResponse.set(task.getValue());
         });
-        new Thread(task).start();
+
+        imageResponse.set(ImageFilterResponse.loading());
+        ExecutorService executorService
+                = Executors.newFixedThreadPool(1);
+        executorService.execute(task);
+        executorService.shutdown();
     }
 
 
@@ -74,11 +81,68 @@ public class FilterInteractors {
         };
     }
 
-    private Boolean isTaskActive(){
-        if(task == null)return false;
-        if(task.isRunning()) return true;
+    private Boolean isTaskActive() {
+        if (task == null) return false;
+        if (task.isRunning()) return true;
         return false;
     }
 
+    public String getCurrentFile() {
+        return currentFile;
+    }
 
+    public void setCurrentFile(String currentFile) {
+        this.currentFile = currentFile;
+    }
+
+    public BaseFilter getCurrentFilter() {
+        return currentFilter;
+    }
+
+
+    public void setCurrentFilter(int filterMode) {
+        switch (filterMode) {
+            case BILATERAL_BLUR_FILTER:
+                setCurrentFilter(BilateralFilter);
+                break;
+            case GAUSSIAN_BLUR_FILTER:
+                setCurrentFilter(gaussianBlurFilter);
+                break;
+            case COMMON_FILTER:
+                setCurrentFilter(commonFilter);
+                break;
+            case BLUR_FILTER:
+                setCurrentFilter(blurFilter);
+                break;
+            case MEDIAN_BLUR:
+                setCurrentFilter(medianBlur);
+                break;
+        }
+    }
+
+    private void setCurrentFilter(BaseFilter currentFilter) {
+        this.currentFilter = currentFilter;
+        App.println(currentFilter.filterName());
+        App.println(this.currentFilter.filterName() );
+        filterName.set(currentFilter.filterName());
+    }
+
+    public SimpleObjectProperty<ImageFilterResponse> imageResponseProperty() {
+        return imageResponse;
+    }
+
+    public String getFilterName() {
+        return filterName.get();
+    }
+
+    public SimpleStringProperty filterNameProperty() {
+        return filterName;
+    }
+
+    public Task taskProgressPropery(){
+        return this.task;
+    }
 }
+
+
+

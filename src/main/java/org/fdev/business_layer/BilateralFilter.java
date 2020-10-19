@@ -12,10 +12,9 @@ import static org.opencv.core.Core.BORDER_DEFAULT;
 
 public class BilateralFilter implements BaseFilter {
 
-    private static final String SUCCESS_FILTER = "BlurFilter Success";
-    private static final String FAIL_FILTER = "BlurFilter Fail";
+    private static final String SUCCESS_FILTER = "Bilateral Filter Success";
+    private static final String FAIL_FILTER = "Bilateral Filter Fail";
     private static final String FILEPATH_EMPTY = "Filepath should not empty";
-
 
     public ImageFilterResponse filter(String filepath){
         try{
@@ -35,6 +34,11 @@ public class BilateralFilter implements BaseFilter {
             String errorMessage = exception.getMessage();
             return ImageFilterResponse.error(FAIL_FILTER + "\n cause : \n\n" +  errorMessage);
         }
+    }
+
+    @Override
+    public String filterName() {
+        return "Bilateral Filter";
     }
 
 }

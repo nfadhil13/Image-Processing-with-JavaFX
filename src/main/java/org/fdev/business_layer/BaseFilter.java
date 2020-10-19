@@ -5,4 +5,5 @@ import org.fdev.utiil.ImageFilterResponse;
 interface BaseFilter {
 
     public ImageFilterResponse filter(String filePath);
+    public String filterName();
 }

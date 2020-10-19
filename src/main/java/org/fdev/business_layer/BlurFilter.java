@@ -21,6 +21,7 @@ public class BlurFilter implements BaseFilter {
     private static final String FILEPATH_EMPTY = "Filepath should not empty";
 
 
+
     public ImageFilterResponse filter(String filepath){
         try{
             if(!filepath.equals("")){
@@ -41,6 +42,11 @@ public class BlurFilter implements BaseFilter {
             String errorMessage = exception.getMessage();
             return ImageFilterResponse.error(FAIL_FILTER + "\n cause : \n\n" +  errorMessage);
         }
+    }
+
+    @Override
+    public String filterName() {
+        return "Blur Filter";
     }
 
 }

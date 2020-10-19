@@ -6,6 +6,8 @@ public class ImageFilterResponse<T>{
     private T data;
     private String message;
 
+
+
     public static <K> ImageFilterResponse loading(){
         return new ImageFilterResponse<K>(Status.LOADING , null , null);
     }
@@ -47,4 +49,6 @@ public class ImageFilterResponse<T>{
     public void setMessage(String message) {
         this.message = message;
     }
+
+
 }

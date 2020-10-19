@@ -13,8 +13,8 @@ import static org.opencv.core.Core.BORDER_DEFAULT;
 
 public class MedianBlur implements BaseFilter{
 
-    private static final String SUCCESS_FILTER = "GaussianBlurFilter Success";
-    private static final String FAIL_FILTER = "GaussianBlurFilter Fail";
+    private static final String SUCCESS_FILTER = "Median Blur Success";
+    private static final String FAIL_FILTER = "Median Blur Fail";
     private static final String FILEPATH_EMPTY = "Filepath should not empty";
 
 
@@ -35,6 +35,11 @@ public class MedianBlur implements BaseFilter{
             String errorMessage = exception.getMessage();
             return ImageFilterResponse.error(FAIL_FILTER + "\n cause : \n\n" +  errorMessage);
         }
+    }
+
+    @Override
+    public String filterName() {
+        return "Median Blur Filter";
     }
 
 }

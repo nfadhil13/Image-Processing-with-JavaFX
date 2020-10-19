@@ -38,4 +38,9 @@ public class GaussianBlurFilter implements BaseFilter{
         }
     }
 
+    @Override
+    public String filterName() {
+        return "Gaussian Blur Filter";
+    }
+
 }
