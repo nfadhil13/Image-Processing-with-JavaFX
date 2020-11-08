@@ -2,8 +2,8 @@ package org.fdev.business_layer;
 
 import org.fdev.utiil.ImageFilterResponse;
 
-interface BaseFilter {
+public interface BaseProcessor {
 
     public ImageFilterResponse filter(String filePath);
-    public String filterName();
+    public String name();
 }

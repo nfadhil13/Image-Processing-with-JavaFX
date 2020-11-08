@@ -1,26 +1,29 @@
 package org.fdev.utiil;
 
-public class ImageFilterResponse<T>{
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+
+public class ImageFilterResponse{
 
     private Status status;
-    private T data;
+    private ByteArrayInputStream data;
     private String message;
 
 
 
     public static <K> ImageFilterResponse loading(){
-        return new ImageFilterResponse<K>(Status.LOADING , null , null);
+        return new ImageFilterResponse(Status.LOADING , null , null);
     }
 
-    public static <K> ImageFilterResponse succes(K data , String message){
-        return new ImageFilterResponse<K>(Status.SUCCESS , data , message);
+    public static <K> ImageFilterResponse succes(ByteArrayInputStream data , String message){
+        return new ImageFilterResponse(Status.SUCCESS , data , message);
     }
 
     public static <K> ImageFilterResponse error(String message){
-        return new ImageFilterResponse<K>(Status.ERROR , null , message);
+        return new ImageFilterResponse(Status.ERROR , null , message);
     }
 
-    private ImageFilterResponse(Status status , T data , String message){
+    private ImageFilterResponse(Status status , ByteArrayInputStream data , String message){
         this.status = status;
         this.data =data;
         this.message = message;
@@ -34,11 +37,11 @@ public class ImageFilterResponse<T>{
         this.status = status;
     }
 
-    public T getData() {
+    public ByteArrayInputStream getData() {
         return data;
     }
 
-    public void setData(T data) {
+    public void setData(ByteArrayInputStream data) {
         this.data = data;
     }
 

@@ -17,16 +17,17 @@
         <menus>
           <Menu fx:id="menuFile" mnemonicParsing="false" text="File">
           </Menu>
-          <Menu fx:id="menuFilter" mnemonicParsing="false" text="Change Filter">
+          <Menu fx:id="menuFilter" mnemonicParsing="false" text="Filter">
           </Menu>
-          <Menu mnemonicParsing="false" text="Help">
+          <Menu fx:id="menuMorphology" mnemonicParsing="false" text="Morphology">
           </Menu>
+            <Menu fx:id="menuNoise" mnemonicParsing="false" text="Noise" />
         </menus>
       </MenuBar>
       <Pane prefHeight="577.0" prefWidth="800.0">
          <children>
              <ProgressIndicator fx:id="progressIndicator" layoutX="387.0" layoutY="155.0" prefHeight="36.0" prefWidth="49.0" progress="0.0" />
-            <Button fx:id="controlButton" layoutX="352.0" layoutY="470.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="96.0" text="Save" />
+            <Button fx:id="controlButton" layoutX="352.0" layoutY="470.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="96.0" text="Execute" />
             <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#1f93ff00" height="300.0" layoutX="32.0" layoutY="23.0" stroke="BLACK" strokeType="INSIDE" width="300.0" />
             <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#1f93ff00" height="300.0" layoutX="466.0" layoutY="23.0" stroke="BLACK" strokeType="INSIDE" width="300.0" />
             <Text layoutX="129.0" layoutY="349.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Before" wrappingWidth="40.388671875" />
@@ -48,6 +49,7 @@
                   <Font size="18.0" />
                </font>
             </Text>
+            <Button fx:id="exportImage" layoutX="352.0" layoutY="508.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="96.0" text="Export Image" />
          </children>
       </Pane>
    </children>

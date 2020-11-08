@@ -1,9 +1,9 @@
-package org.fdev.business_layer;
+package org.fdev.business_layer.filtering;
 
+import org.fdev.business_layer.BaseProcessor;
 import org.fdev.utiil.ImageFilterResponse;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
-import org.opencv.core.Point;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
@@ -11,15 +11,12 @@ import org.opencv.imgproc.Imgproc;
 import java.io.ByteArrayInputStream;
 
 import static org.opencv.core.Core.BORDER_DEFAULT;
-import static org.opencv.core.CvType.CV_32FC1;
-import static org.opencv.core.CvType.CV_8U;
 
-public class BlurFilter implements BaseFilter {
+public class GaussianBlurFilter implements BaseProcessor {
 
-    private static final String SUCCESS_FILTER = "BlurFilter Success";
-    private static final String FAIL_FILTER = "BlurFilter Fail";
+    private static final String SUCCESS_FILTER = "GaussianBlurFilter Success";
+    private static final String FAIL_FILTER = "GaussianBlurFilter Fail";
     private static final String FILEPATH_EMPTY = "Filepath should not empty";
-
 
 
     public ImageFilterResponse filter(String filepath){
@@ -27,11 +24,9 @@ public class BlurFilter implements BaseFilter {
             if(!filepath.equals("")){
                 Imgcodecs imageCodecs = new Imgcodecs();
                 Mat src = imageCodecs.imread(filepath);
+                Size ksize = new Size(3,3);
                 Mat dst = new Mat();
-                Size size = new Size(3,3);
-                Point anchor = new Point(-1,-1);
-                Imgproc.blur(src, dst, size, anchor, BORDER_DEFAULT);
-                Imgproc.boxFilter(src,dst,-1,size,anchor,true,BORDER_DEFAULT);
+                Imgproc.GaussianBlur(src , dst , ksize , 0 ,0 , BORDER_DEFAULT);
                 MatOfByte buffer = new MatOfByte();
                 Imgcodecs.imencode(".png",dst , buffer);
                 return ImageFilterResponse.succes(new ByteArrayInputStream(buffer.toArray()), SUCCESS_FILTER);
@@ -45,8 +40,8 @@ public class BlurFilter implements BaseFilter {
     }
 
     @Override
-    public String filterName() {
-        return "Blur Filter";
+    public String name() {
+        return "Gaussian Blur Filter";
     }
 
 }

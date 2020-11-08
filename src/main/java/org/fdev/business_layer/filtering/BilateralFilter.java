@@ -1,5 +1,6 @@
-package org.fdev.business_layer;
+package org.fdev.business_layer.filtering;
 
+import org.fdev.business_layer.BaseProcessor;
 import org.fdev.utiil.ImageFilterResponse;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
@@ -10,7 +11,7 @@ import java.io.ByteArrayInputStream;
 
 import static org.opencv.core.Core.BORDER_DEFAULT;
 
-public class BilateralFilter implements BaseFilter {
+public class BilateralFilter implements BaseProcessor {
 
     private static final String SUCCESS_FILTER = "Bilateral Filter Success";
     private static final String FAIL_FILTER = "Bilateral Filter Fail";
@@ -37,7 +38,7 @@ public class BilateralFilter implements BaseFilter {
     }
 
     @Override
-    public String filterName() {
+    public String name() {
         return "Bilateral Filter";
     }
 

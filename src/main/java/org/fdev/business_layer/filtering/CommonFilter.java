@@ -1,20 +1,23 @@
-package org.fdev.business_layer;
+package org.fdev.business_layer.filtering;
 
+import org.fdev.business_layer.BaseProcessor;
 import org.fdev.utiil.ImageFilterResponse;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
-import org.opencv.core.Size;
+import org.opencv.core.Point;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.ByteArrayInputStream;
 
 import static org.opencv.core.Core.BORDER_DEFAULT;
+import static org.opencv.core.CvType.CV_32FC1;
+import static org.opencv.core.CvType.CV_8U;
 
-public class MedianBlur implements BaseFilter{
+public class CommonFilter implements BaseProcessor {
 
-    private static final String SUCCESS_FILTER = "Median Blur Success";
-    private static final String FAIL_FILTER = "Median Blur Fail";
+    private static final String SUCCESS_FILTER = "Common Filter Success";
+    private static final String FAIL_FILTER = "Common Filter Fail";
     private static final String FILEPATH_EMPTY = "Filepath should not empty";
 
 
@@ -24,7 +27,9 @@ public class MedianBlur implements BaseFilter{
                 Imgcodecs imageCodecs = new Imgcodecs();
                 Mat src = imageCodecs.imread(filepath);
                 Mat dst = new Mat();
-                Imgproc.medianBlur(src , dst , 5);
+                Mat mat = Mat.eye(3,3,CV_32FC1);
+                Point anchor = new Point(-1,-1);
+                Imgproc.filter2D(src, dst, CV_8U, mat, anchor, 0, BORDER_DEFAULT);
                 MatOfByte buffer = new MatOfByte();
                 Imgcodecs.imencode(".png",dst , buffer);
                 return ImageFilterResponse.succes(new ByteArrayInputStream(buffer.toArray()), SUCCESS_FILTER);
@@ -38,8 +43,8 @@ public class MedianBlur implements BaseFilter{
     }
 
     @Override
-    public String filterName() {
-        return "Median Blur Filter";
+    public String name() {
+        return "Common Filter";
     }
 
 }
