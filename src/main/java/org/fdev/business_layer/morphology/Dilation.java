@@ -10,7 +10,7 @@ import org.opencv.imgproc.Imgproc;
 
 import java.io.ByteArrayInputStream;
 
-public class Dilation implements BaseProcessor {
+public class Dilation extends MorphologyBaseProcessor {
 
 
     private static final String SUCCESS_PROCESS = "Dilataion success";
@@ -23,7 +23,7 @@ public class Dilation implements BaseProcessor {
             if(!filePath.equals("")){
                 Mat src = Imgcodecs.imread(filePath);
                 Mat dst = new Mat();
-                Mat kernel = Mat.ones(5, 5, CvType.CV_32F);
+                Mat kernel = Mat.ones(getKernelSize(), getKernelSize(), CvType.CV_32F);
                 Imgproc.morphologyEx(src , dst , Imgproc.MORPH_DILATE , kernel);
                 MatOfByte buffer = new MatOfByte();
                 Imgcodecs.imencode(".png",dst , buffer);
@@ -39,6 +39,6 @@ public class Dilation implements BaseProcessor {
 
     @Override
     public String name() {
-        return "Closing Morphology";
+        return "Dilation Morphology";
     }
 }

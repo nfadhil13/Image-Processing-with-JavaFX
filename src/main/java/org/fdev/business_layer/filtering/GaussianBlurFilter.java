@@ -12,7 +12,7 @@ import java.io.ByteArrayInputStream;
 
 import static org.opencv.core.Core.BORDER_DEFAULT;
 
-public class GaussianBlurFilter implements BaseProcessor {
+public class GaussianBlurFilter extends FilterBaseProcessor {
 
     private static final String SUCCESS_FILTER = "GaussianBlurFilter Success";
     private static final String FAIL_FILTER = "GaussianBlurFilter Fail";
@@ -24,7 +24,7 @@ public class GaussianBlurFilter implements BaseProcessor {
             if(!filepath.equals("")){
                 Imgcodecs imageCodecs = new Imgcodecs();
                 Mat src = imageCodecs.imread(filepath);
-                Size ksize = new Size(3,3);
+                Size ksize = new Size(this.getKernelSize(),this.getKernelSize());
                 Mat dst = new Mat();
                 Imgproc.GaussianBlur(src , dst , ksize , 0 ,0 , BORDER_DEFAULT);
                 MatOfByte buffer = new MatOfByte();

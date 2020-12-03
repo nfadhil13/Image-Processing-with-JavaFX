@@ -11,7 +11,7 @@ import java.io.ByteArrayInputStream;
 
 import static org.opencv.core.Core.BORDER_DEFAULT;
 
-public class BilateralFilter implements BaseProcessor {
+public class BilateralFilter extends FilterBaseProcessor {
 
     private static final String SUCCESS_FILTER = "Bilateral Filter Success";
     private static final String FAIL_FILTER = "Bilateral Filter Fail";
@@ -24,7 +24,7 @@ public class BilateralFilter implements BaseProcessor {
                 Mat src = imageCodecs.imread(filepath);
                 Mat dst = new Mat();
                 Imgproc.cvtColor(src , src , Imgproc.COLOR_RGBA2RGB , 0);
-                Imgproc.bilateralFilter(src , dst , 9 , 75 ,75 , BORDER_DEFAULT);
+                Imgproc.bilateralFilter(src , dst , 9 , getKernelSize() ,getKernelSize() , BORDER_DEFAULT);
                 MatOfByte buffer = new MatOfByte();
                 Imgcodecs.imencode(".png",dst , buffer);
                 return ImageFilterResponse.succes(new ByteArrayInputStream(buffer.toArray()), SUCCESS_FILTER);

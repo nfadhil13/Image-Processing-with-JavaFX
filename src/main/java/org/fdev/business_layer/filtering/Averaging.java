@@ -13,13 +13,11 @@ import java.io.ByteArrayInputStream;
 
 import static org.opencv.core.Core.BORDER_DEFAULT;
 
-public class BlurFilter implements BaseProcessor {
+public class Averaging extends FilterBaseProcessor {
 
-    private static final String SUCCESS_FILTER = "BlurFilter Success";
-    private static final String FAIL_FILTER = "BlurFilter Fail";
-    private static final String FILEPATH_EMPTY = "Filepath should not empty";
-
-
+    private static final String SUCCESS_FILTER = "Averaging Success";
+    private static final String FAIL_FILTER = "Averaging Fail";
+    private static final String FILEPATH_EMPTY = "Averaging should not empty";
 
     public ImageFilterResponse filter(String filepath){
         try{
@@ -27,7 +25,7 @@ public class BlurFilter implements BaseProcessor {
                 Imgcodecs imageCodecs = new Imgcodecs();
                 Mat src = imageCodecs.imread(filepath);
                 Mat dst = new Mat();
-                Size size = new Size(3,3);
+                Size size = new Size(getKernelSize(),getKernelSize());
                 Point anchor = new Point(-1,-1);
                 Imgproc.blur(src, dst, size, anchor, BORDER_DEFAULT);
                 Imgproc.boxFilter(src,dst,-1,size,anchor,true,BORDER_DEFAULT);
@@ -45,7 +43,7 @@ public class BlurFilter implements BaseProcessor {
 
     @Override
     public String name() {
-        return "Blur Filter";
+        return "Averaging Filter";
     }
 
 }

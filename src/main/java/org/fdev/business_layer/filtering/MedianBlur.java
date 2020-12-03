@@ -1,5 +1,6 @@
 package org.fdev.business_layer.filtering;
 
+import org.fdev.App;
 import org.fdev.business_layer.BaseProcessor;
 import org.fdev.utiil.ImageFilterResponse;
 import org.opencv.core.Mat;
@@ -9,7 +10,7 @@ import org.opencv.imgproc.Imgproc;
 
 import java.io.ByteArrayInputStream;
 
-public class MedianBlur implements BaseProcessor {
+public class MedianBlur extends FilterBaseProcessor {
 
     private static final String SUCCESS_FILTER = "Median Blur Success";
     private static final String FAIL_FILTER = "Median Blur Fail";
@@ -21,8 +22,9 @@ public class MedianBlur implements BaseProcessor {
             if(!filepath.equals("")){
                 Imgcodecs imageCodecs = new Imgcodecs();
                 Mat src = imageCodecs.imread(filepath);
+                App.println(" " +  src.rows() + " " + src.cols());
                 Mat dst = new Mat();
-                Imgproc.medianBlur(src , dst , 5);
+                Imgproc.medianBlur(src , dst , this.getKernelSize());
                 MatOfByte buffer = new MatOfByte();
                 Imgcodecs.imencode(".png",dst , buffer);
                 return ImageFilterResponse.succes(new ByteArrayInputStream(buffer.toArray()), SUCCESS_FILTER);
@@ -37,7 +39,7 @@ public class MedianBlur implements BaseProcessor {
 
     @Override
     public String name() {
-        return "Median Blur Filter";
+        return "Median Blur Filtering";
     }
 
 }

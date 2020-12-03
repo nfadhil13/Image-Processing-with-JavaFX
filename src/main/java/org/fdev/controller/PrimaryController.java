@@ -1,23 +1,26 @@
 package org.fdev.controller;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
+import javafx.util.converter.NumberStringConverter;
 import org.fdev.App;
+import org.fdev.business_layer.ImageProcessType;
 import org.fdev.business_layer.ProcessImageInteractors;
 import org.fdev.business_layer.SaveImage;
 import org.fdev.business_layer.SaveImageCallback;
+import org.fdev.business_layer.noise.NoiseBaseProcessor;
 import org.fdev.utiil.ImageFilterResponse;
 
 public class PrimaryController implements Initializable, SaveImageCallback {
@@ -35,14 +38,19 @@ public class PrimaryController implements Initializable, SaveImageCallback {
     public Text warnText;
     public Menu menuMorphology;
     public Button exportImage;
+    public Menu menuNoise;
+    public Menu menuEdgeDetection;
+    public BorderPane kernelContainer;
+    public TextField kernelEditText;
+    public Pane intensityContainer;
+    public Slider intensitySlider;
+    public Text intesityValue;
+    public Button changeImage;
 
-    private MenuItem bilateralFilter,blurFilter,commonFIlter,gaussianBlur,medianBlur, closingMorph , dilationMorph , erosionMorph , openingMorph;
 
+    private ProcessImageInteractors imageProcesInteractors = new ProcessImageInteractors();
 
-    private ProcessImageInteractors filterInteractors;
-
-
-    private SaveImage saveImage = new SaveImage(this);
+    private final SaveImage saveImage = new SaveImage(this);
 
 
 
@@ -53,42 +61,90 @@ public class PrimaryController implements Initializable, SaveImageCallback {
     }
 
     private void initListener() {
-        filterInteractors = new ProcessImageInteractors();
-        filterInteractors.imageResponseProperty().addListener((observableValue, oldValue, newValue) -> {
+        imageProcesInteractors = new ProcessImageInteractors();
+        imageProcesInteractors.imageResponseProperty().addListener((observableValue, oldValue, newValue) -> {
             imageFilterStateChange(newValue);
         });
-        filterInteractors.filterNameProperty().addListener(((observableValue, oldValue, newValue) -> {
-            filterNameTV.setText(newValue);
-        }));
+        imageProcesInteractors.observableCurrentFilter().addListener((observableValue, oldValue, newValue) ->{
+            filterNameTV.setText(newValue.name());
+            if(newValue.tpye() == ImageProcessType.TYPE_FILTER  || newValue.tpye() == ImageProcessType.TYPE_MORPHOLOGY) {
+                kernelContainer.setVisible(true);
+                intensityContainer.setVisible(false);
+            }else if(newValue.tpye() == ImageProcessType.TYPE_NOISE){
+                intensitySlider.setValue(((NoiseBaseProcessor)newValue).getIntensity());
+                kernelContainer.setVisible(false);
+                intensityContainer.setVisible(true);
+            }
+        });
         progressIndicator.setVisible(false);
     }
 
     private void initUI() {
+        kernelContainer.setVisible(true);
+        intensityContainer.setVisible(false);
+        kernelEditText.setText(String.valueOf(3));
+        kernelEditText.textProperty().addListener((observableValue, s, newValue) -> {
+            try{
+                warnText.setVisible(false);
+                if(newValue.equals("")){
+                    return;
+                }
+                int kernel = Integer.parseInt(newValue);
+                if(kernel%2 != 0 && kernel>-1){
+                    imageProcesInteractors.setCurrentKernel(kernel);
+                }else{
+                    warnText.setVisible(true);
+                    warnText.setText("Kernel Value harus ganjil dan positif");
+                }
+            }catch(NumberFormatException exception){
+                kernelEditText.setText(s);
+                warnText.setVisible(true);
+                warnText.setText("Kernel Value has to be integer");
+            }
+        });
+        initSlider();
         initMenu();
         initEventListener();
 
     }
 
-
-
+    private void initSlider() {
+        intensitySlider.setMax(1);
+        intensitySlider.setMin(0);
+        intensitySlider.setValue(0.05);
+        intensitySlider.setShowTickLabels(true);
+        intensitySlider.setShowTickMarks(true);
+        intensitySlider.setMajorTickUnit(0.5);
+        intensitySlider.setBlockIncrement(0.001);
+        intensitySlider.valueProperty().addListener((observableValue, number, newValue) -> {
+            intesityValue.setText(newValue.toString());
+            imageProcesInteractors.setCurrentIntesity(newValue.doubleValue());
+        });
+    }
 
     private void initMenu() {
         initFileMenu();
-        initFilterMenu();
-        initMorphologyMenu();
+        initInteractorMenu();
     }
 
+
     private void initEventListener() {
+        warnText.setVisible(false);
         controlButton.setOnAction(e -> {
             warnText.setVisible(false);
-            filterInteractors.filterImage();
+            imageProcesInteractors.filterImage();
         });
         
         exportImage.setOnAction(e -> {
             exportImage();
         });
 
+        changeImage.setOnAction(e -> {
+            makeAsMainImage();
+        });
+
     }
+
 
     private void exportImage() {
         FileChooser filechooser = new FileChooser();
@@ -102,80 +158,42 @@ public class PrimaryController implements Initializable, SaveImageCallback {
         }
     }
 
-    private void initFilterMenu() {
-        //Bilateral Menu
-        bilateralFilter = new MenuItem("Bilateral Blur");
-        bilateralFilter.setOnAction(e -> {
-            filterInteractors.setCurrentProcessType(ProcessImageInteractors.BILATERAL_BLUR_FILTER);
-            App.println("bilateralFilter clicked");
+    private void initInteractorMenu() {
+        imageProcesInteractors.getFilters().forEach(item -> {
+            MenuItem menu = new MenuItem(item.name());
+            menu.setOnAction(e->{
+                imageProcesInteractors.setCurrentProcessType(item);
+            });
+            menuFilter.getItems().add(menu);
         });
 
-
-        //Blur filter menu
-        blurFilter = new MenuItem("Blur Filter");
-        blurFilter.setOnAction(e -> {
-            filterInteractors.setCurrentProcessType(ProcessImageInteractors.BLUR_FILTER);
-            App.println("blurFilter clicked");
+        imageProcesInteractors.getNoises().forEach(item -> {
+            MenuItem menu = new MenuItem(item.name());
+            menu.setOnAction(e->{
+                imageProcesInteractors.setCurrentProcessType(item);
+            });
+            menuNoise.getItems().add(menu);
         });
 
-
-
-        //Common filter
-        commonFIlter = new MenuItem("Common Filter");
-        commonFIlter.setOnAction(e-> {
-            filterInteractors.setCurrentProcessType(ProcessImageInteractors.COMMON_FILTER);
-            App.println("common filter clicked");
+        imageProcesInteractors.getEdgeDetecions().forEach(item -> {
+            MenuItem menu = new MenuItem(item.name());
+            menu.setOnAction(e->{
+                imageProcesInteractors.setCurrentProcessType(item);
+            });
+            menuEdgeDetection.getItems().add(menu);
         });
 
-
-        //Gaussian Filter
-        gaussianBlur = new MenuItem("Gaussian Blur ");
-        gaussianBlur.setOnAction(e -> {
-            filterInteractors.setCurrentProcessType(ProcessImageInteractors.GAUSSIAN_BLUR_FILTER);
-            App.println("gaussianBlur clicked");
+        imageProcesInteractors.getMorphologies().forEach(item -> {
+            MenuItem menu = new MenuItem(item.name());
+            menu.setOnAction(e->{
+                imageProcesInteractors.setCurrentProcessType(item);
+            });
+            menuMorphology.getItems().add(menu);
         });
-
-
-        //Median filter
-        medianBlur = new MenuItem("Median Blur");
-        medianBlur.setOnAction(e -> {
-            filterInteractors.setCurrentProcessType(ProcessImageInteractors.MEDIAN_BLUR);
-            App.println("medianBlur clicked");
-        });
-        menuFilter.getItems().add(blurFilter);
-        menuFilter.getItems().add(commonFIlter);
-        menuFilter.getItems().add(gaussianBlur);
-        menuFilter.getItems().add(bilateralFilter);
-        menuFilter.getItems().add(medianBlur);
     }
 
-    private void initMorphologyMenu(){
-        //Bilateral Menu
-        closingMorph = new MenuItem("Closing");
-        closingMorph.setOnAction(e -> {
-            filterInteractors.setCurrentProcessType(ProcessImageInteractors.CLOSING_MORPHOLOGY);
-        });
 
-        openingMorph = new MenuItem("Opening");
-        openingMorph.setOnAction(e -> {
-            filterInteractors.setCurrentProcessType(ProcessImageInteractors.OPENING_MORPHOLOGY);
-        });
 
-        dilationMorph = new MenuItem("Dilation");
-        dilationMorph.setOnAction(e -> {
-            filterInteractors.setCurrentProcessType(ProcessImageInteractors.DILATION_MORPHOLOGY);
-        });
-
-        erosionMorph = new MenuItem("Erosion");
-        erosionMorph.setOnAction(e -> {
-            filterInteractors.setCurrentProcessType(ProcessImageInteractors.EROSION_MORPHOLOGY);
-        });
-
-        menuMorphology.getItems().add(closingMorph);
-        menuMorphology.getItems().add(dilationMorph);
-        menuMorphology.getItems().add(erosionMorph);
-        menuMorphology.getItems().add(openingMorph);
-    }
 
     private void initFileMenu() {
         MenuItem menuItemAddFile = new MenuItem("Open Image");
@@ -196,7 +214,7 @@ public class PrimaryController implements Initializable, SaveImageCallback {
         try {
             File file = fc.showOpenDialog(null);
             if (file != null) {
-                filterInteractors.setCurrentFile(file.getAbsolutePath());
+                imageProcesInteractors.setCurrentFile(file.getAbsolutePath());
                 Image image = new Image(file.toURI().toString());
                 imageBefore.setImage(image);
             }
@@ -205,6 +223,14 @@ public class PrimaryController implements Initializable, SaveImageCallback {
         }
     }
 
+
+    private void makeAsMainImage(){
+        if(this.imageAfter != null && this.imageBefore != null){
+            this.imageBefore.setImage(this.imageAfter.getImage());
+        }else{
+            warnText.setText("Please filter some photo first");
+        }
+    }
 
     public void imageFilterStateChange(ImageFilterResponse response) {
         switch (response.getStatus()) {
@@ -222,7 +248,7 @@ public class PrimaryController implements Initializable, SaveImageCallback {
             case LOADING:
                 App.println("Loading");
                 progressIndicator.setVisible(true);
-                progressIndicator.progressProperty().bind(filterInteractors.taskProgressPropery().progressProperty());
+                progressIndicator.progressProperty().bind(imageProcesInteractors.taskProgressPropery().progressProperty());
                 break;
         }
     }

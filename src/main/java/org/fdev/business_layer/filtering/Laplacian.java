@@ -2,23 +2,20 @@ package org.fdev.business_layer.filtering;
 
 import org.fdev.business_layer.BaseProcessor;
 import org.fdev.utiil.ImageFilterResponse;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
-import org.opencv.core.Point;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.ByteArrayInputStream;
 
-import static org.opencv.core.Core.BORDER_DEFAULT;
-import static org.opencv.core.CvType.CV_32FC1;
-import static org.opencv.core.CvType.CV_8U;
+public class Laplacian extends FilterBaseProcessor {
 
-public class CommonFilter implements BaseProcessor {
-
-    private static final String SUCCESS_FILTER = "Common Filter Success";
-    private static final String FAIL_FILTER = "Common Filter Fail";
-    private static final String FILEPATH_EMPTY = "Filepath should not empty";
+    private static final String SUCCESS_FILTER = "Laplacian  Success";
+    private static final String FAIL_FILTER = "Laplacian  Fail";
+    private static final String FILEPATH_EMPTY = "File should not empty";
 
 
     public ImageFilterResponse filter(String filepath){
@@ -27,11 +24,13 @@ public class CommonFilter implements BaseProcessor {
                 Imgcodecs imageCodecs = new Imgcodecs();
                 Mat src = imageCodecs.imread(filepath);
                 Mat dst = new Mat();
-                Mat mat = Mat.eye(3,3,CV_32FC1);
-                Point anchor = new Point(-1,-1);
-                Imgproc.filter2D(src, dst, CV_8U, mat, anchor, 0, BORDER_DEFAULT);
+                Mat abs_dst = new Mat();
+                Mat src_gray = new Mat();
+                Imgproc.cvtColor( src, src_gray, Imgproc.COLOR_RGB2GRAY );
+                Imgproc.Laplacian(src_gray , dst , CvType.CV_16S , this.getKernelSize() , 1, 0 , Core.BORDER_DEFAULT);
+                Core.convertScaleAbs( dst, abs_dst );
                 MatOfByte buffer = new MatOfByte();
-                Imgcodecs.imencode(".png",dst , buffer);
+                Imgcodecs.imencode(".png", abs_dst , buffer);
                 return ImageFilterResponse.succes(new ByteArrayInputStream(buffer.toArray()), SUCCESS_FILTER);
             }else{
                 return ImageFilterResponse.error(FILEPATH_EMPTY);
@@ -44,7 +43,7 @@ public class CommonFilter implements BaseProcessor {
 
     @Override
     public String name() {
-        return "Common Filter";
+        return "Laplacian Filter";
     }
 
 }

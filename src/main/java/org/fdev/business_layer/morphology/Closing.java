@@ -12,7 +12,7 @@ import java.io.ByteArrayInputStream;
 
 import static org.opencv.core.Core.BORDER_DEFAULT;
 
-public class Closing implements BaseProcessor {
+public class Closing extends MorphologyBaseProcessor {
 
     private static final String SUCCESS_PROCESS = "Closing success";
     private static final String FAIL_PROCESS = "Closing Fail";
@@ -24,7 +24,7 @@ public class Closing implements BaseProcessor {
             if(!filePath.equals("")){
                 Mat src = Imgcodecs.imread(filePath);
                 Mat dst = new Mat();
-                Mat kernel = Mat.ones(5, 5, CvType.CV_32F);
+                Mat kernel = Mat.ones(getKernelSize(), getKernelSize(), CvType.CV_32F);
                 Imgproc.morphologyEx(src , dst , Imgproc.MORPH_CLOSE , kernel);
                 MatOfByte buffer = new MatOfByte();
                 Imgcodecs.imencode(".png",dst , buffer);

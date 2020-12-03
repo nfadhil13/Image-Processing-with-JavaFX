@@ -1,67 +1,63 @@
 package org.fdev.business_layer;
 
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.concurrent.Task;
-import org.fdev.App;
-import org.fdev.business_layer.filtering.*;
-import org.fdev.business_layer.morphology.Closing;
-import org.fdev.business_layer.morphology.Dilation;
-import org.fdev.business_layer.morphology.Erosion;
-import org.fdev.business_layer.morphology.Opening;
+import org.fdev.business_layer.edge_detection.EdgeDetectionBaseProcessor;
+import org.fdev.business_layer.edge_detection.EdgeDetectionInteractors;
+import org.fdev.business_layer.filtering.FilterBaseProcessor;
+import org.fdev.business_layer.filtering.FilterInteractors;
+import org.fdev.business_layer.morphology.MorphologyBaseProcessor;
+import org.fdev.business_layer.morphology.MorphologyInteractors;
+import org.fdev.business_layer.noise.NoiseBaseProcessor;
+import org.fdev.business_layer.noise.NoiseInteractors;
 import org.fdev.utiil.ImageFilterResponse;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static org.fdev.business_layer.ImageProcessType.TYPE_NOISE;
+
 public class ProcessImageInteractors {
-
-    //Filetring
-    public static final int BILATERAL_BLUR_FILTER = 1;
-    public static final int GAUSSIAN_BLUR_FILTER = 2;
-    public static final int BLUR_FILTER = 3;
-    public static final int COMMON_FILTER = 4;
-    public static final int MEDIAN_BLUR = 5;
-
-    //Morphology
-    public static final int CLOSING_MORPHOLOGY =  21;
-    public static final int DILATION_MORPHOLOGY =  22;
-    public static final int EROSION_MORPHOLOGY =  23;
-    public static final int OPENING_MORPHOLOGY =  24;
 
     private Task<ImageFilterResponse> task;
 
-
-    private BilateralFilter bilateralFilter = new BilateralFilter();
-    private CommonFilter commonFilter = new CommonFilter();
-    private BlurFilter blurFilter = new BlurFilter();
-    private GaussianBlurFilter gaussianBlurFilter = new GaussianBlurFilter();
-    private MedianBlur medianBlur = new MedianBlur();
-
-    private Closing closingMorphology = new Closing();
-    private Dilation dilationMorphology = new Dilation();
-    private Erosion erosionMorphology = new Erosion();
-    private Opening openingMorphology = new Opening();
-
-
-    private SimpleStringProperty filterName;
-    private SimpleObjectProperty<ImageFilterResponse> imageResponse = new SimpleObjectProperty<>();
-
-
     private String currentFile = "";
-    private BaseProcessor currentFilter;
 
+    private double currentIntesity;
+    private int currentKernel;
+
+    private final NoiseInteractors noiseInteractors = new NoiseInteractors();
+    private final MorphologyInteractors morphologyInteractors = new MorphologyInteractors();
+    private final FilterInteractors filterInteractors = new FilterInteractors();
+    private final EdgeDetectionInteractors edgeDetectionInteractors = new EdgeDetectionInteractors();
+
+
+    private final SimpleObjectProperty<ImageFilterResponse> imageResponse = new SimpleObjectProperty<>();
+    private final SimpleObjectProperty<BaseProcessor> currentFilter = new SimpleObjectProperty<>();
 
     public ProcessImageInteractors() {
         initDummyTask();
-        currentFilter = commonFilter;
-        filterName = new SimpleStringProperty(currentFilter.name());
+        setCurrentProcessType(filterInteractors.getFilters().get(0));
+
     }
+
 
 
     public void filterImage() {
         if (!currentFile.equals("")) {
             if (!isTaskActive()) {
+                switch (getCurrentFilter().tpye()){
+                    case TYPE_NOISE :
+                        ((NoiseBaseProcessor)getCurrentFilter()).setIntensity(currentIntesity);
+                        break;
+                    case TYPE_FILTER:
+                        ((FilterBaseProcessor)getCurrentFilter()).setKernelSize(currentKernel);
+                        break;
+                    case TYPE_MORPHOLOGY:
+                        ((MorphologyBaseProcessor)getCurrentFilter()).setKernelSize(currentKernel);
+                        break;
+                }
                 doFilter(getCurrentFilter());
             } else {
                 imageResponse.set(ImageFilterResponse.error("Your filtering still running"));
@@ -101,8 +97,7 @@ public class ProcessImageInteractors {
 
     private Boolean isTaskActive() {
         if (task == null) return false;
-        if (task.isRunning()) return true;
-        return false;
+        return task.isRunning();
     }
 
     public String getCurrentFile() {
@@ -110,66 +105,69 @@ public class ProcessImageInteractors {
     }
 
     public void setCurrentFile(String currentFile) {
+
         this.currentFile = currentFile;
     }
 
     public BaseProcessor getCurrentFilter() {
-        return currentFilter;
+        return this.currentFilter.getValue();
     }
 
+    public void setCurrentIntesity(){
 
-    public void setCurrentProcessType(int filterMode) {
-        switch (filterMode) {
-            case BILATERAL_BLUR_FILTER:
-                setCurrentProcessType(bilateralFilter);
-                break;
-            case GAUSSIAN_BLUR_FILTER:
-                setCurrentProcessType(gaussianBlurFilter);
-                break;
-            case COMMON_FILTER:
-                setCurrentProcessType(commonFilter);
-                break;
-            case BLUR_FILTER:
-                setCurrentProcessType(blurFilter);
-                break;
-            case MEDIAN_BLUR:
-                setCurrentProcessType(medianBlur);
-                break;
-            case CLOSING_MORPHOLOGY:
-                setCurrentProcessType(closingMorphology);
-                break;
-            case OPENING_MORPHOLOGY:
-                setCurrentProcessType(openingMorphology);
-                break;
-            case DILATION_MORPHOLOGY:
-                setCurrentProcessType(dilationMorphology);
-                break;
-            case EROSION_MORPHOLOGY:
-                setCurrentProcessType(erosionMorphology);
-                break;
+    }
+
+    public void setCurrentIntesity(double currentIntesity) {
+        this.currentIntesity = currentIntesity;
+    }
+
+    public void setCurrentProcessType(BaseProcessor currentFilter) {
+        if(getCurrentFilter() != null){
+            switch (getCurrentFilter().tpye()){
+                case TYPE_NOISE :
+                    currentIntesity = ((NoiseBaseProcessor)getCurrentFilter()).getIntensity();
+                    break;
+                case TYPE_FILTER:
+                    currentKernel = ((FilterBaseProcessor)getCurrentFilter()).getKernelSize();
+                    break;
+                case TYPE_MORPHOLOGY:
+                    currentKernel = ((MorphologyBaseProcessor)getCurrentFilter()).getKernelSize();
+                    break;
+            }
         }
-    }
-
-    private void setCurrentProcessType(BaseProcessor currentFilter) {
-        this.currentFilter = currentFilter;
-        App.println(currentFilter.name());
-        filterName.set(currentFilter.name());
+        this.currentFilter.set(currentFilter);
     }
 
     public SimpleObjectProperty<ImageFilterResponse> imageResponseProperty() {
         return imageResponse;
     }
 
-    public String getFilterName() {
-        return filterName.get();
-    }
 
-    public SimpleStringProperty filterNameProperty() {
-        return filterName;
+    public SimpleObjectProperty<BaseProcessor> observableCurrentFilter() {
+        return this.currentFilter;
     }
 
     public Task taskProgressPropery(){
         return this.task;
+    }
+
+    public void setCurrentKernel(int currentKernel) {
+        this.currentKernel = currentKernel;
+    }
+
+    public List<FilterBaseProcessor> getFilters(){
+        return filterInteractors.getFilters();
+    }
+
+    public List<NoiseBaseProcessor> getNoises(){
+        return noiseInteractors.getNoises();
+    }
+
+    public List<MorphologyBaseProcessor> getMorphologies(){
+        return morphologyInteractors.getMorphologies();
+    }
+    public List<EdgeDetectionBaseProcessor> getEdgeDetecions(){
+        return edgeDetectionInteractors.getEdgeDetections();
     }
 }
 
