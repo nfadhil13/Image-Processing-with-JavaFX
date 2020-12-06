@@ -27,7 +27,7 @@ public class Laplacian extends FilterBaseProcessor {
                 Mat abs_dst = new Mat();
                 Mat src_gray = new Mat();
                 Imgproc.cvtColor( src, src_gray, Imgproc.COLOR_RGB2GRAY );
-                Imgproc.Laplacian(src_gray , dst , CvType.CV_16S , this.getKernelSize() , 1, 0 , Core.BORDER_DEFAULT);
+                Imgproc.Laplacian(src , dst , CvType.CV_16S , this.getKernelSize() , 1, 0 , Core.BORDER_DEFAULT);
                 Core.convertScaleAbs( dst, abs_dst );
                 MatOfByte buffer = new MatOfByte();
                 Imgcodecs.imencode(".png", abs_dst , buffer);

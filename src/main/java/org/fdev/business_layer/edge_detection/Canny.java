@@ -22,11 +22,11 @@ public class Canny extends EdgeDetectionBaseProcessor {
                 Mat gray = new Mat(src.rows(), src.cols(), src.type());
                 Mat edges = new Mat(src.rows(), src.cols(), src.type());
 
-                //Converting the image to Gray
-//                Imgproc.cvtColor(src, gray, Imgproc.COLOR_RGB2GRAY);
-//                //Blurring the image
-//                Imgproc.blur(gray, edges, new Size(3, 3));
-                //Detecting the edges
+//                Converting the image to Gray
+                Imgproc.cvtColor(src, gray, Imgproc.COLOR_RGB2GRAY);
+                //Blurring the image
+                Imgproc.blur(gray, edges, new Size(3, 3));
+//                Detecting the edges
                 Imgproc.Canny(src, edges, 100, 300);
 
                 Mat result = new Mat(src.rows(), src.cols(), src.type());

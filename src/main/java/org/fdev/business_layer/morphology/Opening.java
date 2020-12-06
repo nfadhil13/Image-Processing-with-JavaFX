@@ -22,6 +22,7 @@ public class Opening extends MorphologyBaseProcessor {
             if(!filePath.equals("")){
                 Mat src = Imgcodecs.imread(filePath);
                 Mat dst = new Mat();
+
                 Mat kernel = Mat.ones(getKernelSize(), getKernelSize(), CvType.CV_32F);
                 Imgproc.morphologyEx(src , dst , Imgproc.MORPH_OPEN , kernel);
                 MatOfByte buffer = new MatOfByte();

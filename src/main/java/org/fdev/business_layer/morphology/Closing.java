@@ -5,6 +5,7 @@ import org.fdev.utiil.ImageFilterResponse;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
+import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
@@ -24,7 +25,7 @@ public class Closing extends MorphologyBaseProcessor {
             if(!filePath.equals("")){
                 Mat src = Imgcodecs.imread(filePath);
                 Mat dst = new Mat();
-                Mat kernel = Mat.ones(getKernelSize(), getKernelSize(), CvType.CV_32F);
+                Mat kernel = Imgproc.getStructuringElement( Imgproc.CV_SHAPE_RECT, new Size(getKernelSize(),getKernelSize()));
                 Imgproc.morphologyEx(src , dst , Imgproc.MORPH_CLOSE , kernel);
                 MatOfByte buffer = new MatOfByte();
                 Imgcodecs.imencode(".png",dst , buffer);
