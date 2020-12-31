@@ -74,6 +74,9 @@ public class PrimaryController implements Initializable, SaveImageCallback {
                 intensitySlider.setValue(((NoiseBaseProcessor)newValue).getIntensity());
                 kernelContainer.setVisible(false);
                 intensityContainer.setVisible(true);
+            }else{
+                kernelContainer.setVisible(false);
+                intensityContainer.setVisible(false);
             }
         });
         progressIndicator.setVisible(false);
@@ -150,7 +153,7 @@ public class PrimaryController implements Initializable, SaveImageCallback {
         FileChooser filechooser = new FileChooser();
         filechooser.setTitle("save image");
         filechooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("jpg", "*.jpg")
+                new FileChooser.ExtensionFilter("png", "*.png")
         );
         File file = filechooser.showSaveDialog(null);
         if(file != null){
@@ -209,7 +212,7 @@ public class PrimaryController implements Initializable, SaveImageCallback {
         FileChooser fc = new FileChooser();
         fc.setTitle("Open Image");
         fc.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("jpg", "*.jpg")
+                new FileChooser.ExtensionFilter("png", "*.png")
         );
         try {
             File file = fc.showOpenDialog(null);
